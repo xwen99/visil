@@ -39,6 +39,13 @@ def load_video(video, all_frames=False):
     cap.release()
     return np.array(frames)
 
+# load video_paths from video_file
+def load_video_file(video_file):
+    video_paths = {}
+    videos = np.loadtxt(video_file, dtype=str)
+    for i in range(videos.shape[0]):
+        video_paths[videos[i][0]] = videos[i][1]
+    return video_paths
 
 class VideoGenerator(tf.keras.utils.Sequence):
     def __init__(self, video_file, all_frames=False):
@@ -55,23 +62,20 @@ class VideoGenerator(tf.keras.utils.Sequence):
 
 
 class DatasetGenerator(tf.keras.utils.Sequence):
-    def __init__(self, rootDir, videos, pattern, all_frames=False):
+    def __init__(self, video_file, videos, all_frames=False):
         super(DatasetGenerator, self).__init__()
-        self.rootDir = rootDir
+        self.video_paths = load_video_file(video_file)
         self.videos = videos
-        self.pattern = pattern
         self.all_frames = all_frames
 
     def __len__(self):
         return len(self.videos)
 
     def __getitem__(self, index):
-        video = glob.glob(os.path.join(self.rootDir, self.pattern.replace('{id}', self.videos[index])))
-        if not len(video):
-            print('[WARNING] Video not found: ', self.videos[index])
-            return np.array([]), None
+        if self.videos[index] in self.video_paths:
+            return load_video(self.video_paths[self.videos[index]], all_frames=self.all_frames), self.videos[index]
         else:
-            return load_video(video[0], all_frames=self.all_frames), self.videos[index]
+            return np.array([]), None
 
 
 class CC_WEB_VIDEO(object):

@@ -1,0 +1,1 @@
+python calculate_similarity.py --query_file video_files/fivr_query.txt --database_file video_files/fivr_all.txt --load_queries

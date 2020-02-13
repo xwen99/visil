@@ -9,7 +9,7 @@ from datasets import DatasetGenerator
 def query_vs_database(model, dataset, args):
     # Create a video generator for the queries
     enqueuer = tf.keras.utils.OrderedEnqueuer(
-        DatasetGenerator(args.video_dir, dataset.get_queries(), args.pattern, all_frames='i3d' in args.network),
+        DatasetGenerator(args.video_file, dataset.get_queries(), all_frames='i3d' in args.network),
         use_multiprocessing=True, shuffle=False)
     enqueuer.start(workers=args.threads, max_queue_size=args.threads * 2)
 
@@ -28,7 +28,7 @@ def query_vs_database(model, dataset, args):
 
     # Create a video generator for the database video
     enqueuer = tf.keras.utils.OrderedEnqueuer(
-        DatasetGenerator(args.video_dir, dataset.get_database(), args.pattern, all_frames='i3d' in args.network),
+        DatasetGenerator(args.video_file, dataset.get_database(), all_frames='i3d' in args.network),
         use_multiprocessing=True, shuffle=False)
     enqueuer.start(workers=args.threads, max_queue_size=args.threads * 2)
     generator = enqueuer.get()
@@ -53,7 +53,7 @@ def query_vs_database(model, dataset, args):
 def all_vs_all(model, dataset, args):
     # Create a video generator for the dataset video
     enqueuer = tf.keras.utils.OrderedEnqueuer(
-        DatasetGenerator(args.video_dir, dataset.get_queries(), args.pattern, all_frames='i3d' in args.network),
+        DatasetGenerator(args.video_file, dataset.get_queries(), all_frames='i3d' in args.network),
         use_multiprocessing=True, shuffle=False)
     enqueuer.start(workers=args.threads, max_queue_size=args.threads * 2)
 
@@ -84,12 +84,8 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--dataset', type=str, required=True,
                         help='Name of evaluation dataset. Options: CC_WEB_ VIDEO, '
                              '\"FIVR-200K\", \"FIVR-5K\", \"EVVE\", \"ActivityNet\"')
-    parser.add_argument('-v', '--video_dir', type=str, required=True,
-                        help='Path to file that contains the database videos')
-    parser.add_argument('-p', '--pattern', type=str, required=True,
-                        help='Pattern that the videos are stored in the video directory, eg. \"{id}/video.*\" '
-                             'where the \"{id}\" is replaced with the video Id. Also, it supports '
-                             'Unix style pathname pattern expansion.')
+    parser.add_argument('-v', '--video_file', type=str, required=True,
+                        help='Path to file that contains the database videos and their paths')
     parser.add_argument('-n', '--network', type=str, default='resnet',
                         help='Backbone network used for feature extraction. '
                              'Options: \"resnet\" or \"i3d\". Default: \"resnet\"')
