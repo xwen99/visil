@@ -139,18 +139,18 @@ class ViSiL(object):
         return sim
 
     def load_model(self, model_path):
-        previous_variables = [var_name for var_name, _ in tf.contrib.framework.list_variables(model_path)]
+        previous_variables = [var_name for var_name, _ in tf.train.list_variables(model_path)]
         restore_map = {variable.op.name: variable for variable in tf.global_variables()
                        if variable.op.name in previous_variables and 'PCA' not in variable.op.name} #
         print('[INFO] {} layers loaded'.format(len(restore_map)))
-        tf.contrib.framework.init_from_checkpoint(model_path, restore_map)
+        tf.train.init_from_checkpoint(model_path, restore_map)
         tf_init = tf.global_variables_initializer()
         return tf_init
 
     def extract_features(self, frames, batch_sz):
         features = []
         for b in range(frames.shape[0] // batch_sz + 1):
-            batch = frames[b * batch_sz: (b+1) * batch_sz]
+            batch = frames[b * batch_sz: (b + 1) * batch_sz]
             if batch.shape[0] > 0:
                 if batch.shape[0] >= batch_sz or self.net == 'resnet':
                     features.append(self.sess.run(self.region_vectors, feed_dict={self.frames: batch}))
